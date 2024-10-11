@@ -1,4 +1,5 @@
 #include "Filters.h"
+#include <algorithm>
 
 int NormalizeColor(int color)
 {
@@ -98,11 +99,11 @@ void CountKernelGauss(vector<double>& kernel, int apert)
     }
 }
 
-void GaussFilter(MyImg img, int startRow, int endRow, MyImg* result, vector<double> kernel, int apert)
+void GaussFilter(MyImg img, int startRow, int endRow, MyImg& result, vector<double> kernel, int apert)
 {
     int n = apert * 2 + 1;
 
-    for (int i = 0; i < result->width; i++)
+    for (int i = 0; i < result.width; i++)
     {
         for (int j = startRow; j <= endRow; j++)
         {
@@ -126,15 +127,51 @@ void GaussFilter(MyImg img, int startRow, int endRow, MyImg* result, vector<doub
             respix.r = NormalizeColor(int(round(R)));
             respix.g = NormalizeColor(int(round(G)));
             respix.b = NormalizeColor(int(round(B)));
-            respix.a = result->GetPixel(i, j).a;
+            respix.a = result.GetPixel(i, j).a;
 
-            result->SetPixel(i, j, respix);
+            result.SetPixel(i, j, respix);
         }
     }
 }
 
-void MedianFilter(MyImg img, int startRow, int endRow, MyImg result, int apert)
+void MedianFilter(MyImg img, int startRow, int endRow, MyImg& result, int apert)
 {
+    int n = apert * 2 + 1;
+    int size = n * n;
+
+    for (int i = 0; i < result.width; i++)
+    {
+        for (int j = startRow; j <= endRow; j++)
+        {
+            vector<int> rmas(size, 0);
+            vector<int> gmas(size, 0);
+            vector<int> bmas(size, 0);
+
+            for (int k = 0; k < n; k++)
+            {
+                for (int l = 0; l < n; l++)
+                {
+                    MyPixel pixel = img.GetPixel(i + l, j + k);
+
+                    rmas[k * n + l] = pixel.r;
+                    gmas[k * n + l] = pixel.g;
+                    bmas[k * n + l] = pixel.b;
+                }
+            }
+
+            sort(rmas.begin(), rmas.end());
+            sort(gmas.begin(), gmas.end());
+            sort(bmas.begin(), bmas.end());
+
+            MyPixel respix;
+            respix.r = rmas[apert];
+            respix.g = gmas[apert];
+            respix.b = bmas[apert];
+            respix.a = result.GetPixel(i, j).a;
+
+            result.SetPixel(i, j, respix);
+        }
+    }
 }
 
 void SobelFilter(MyImg img, int startRow, int endRow, MyImg result, int alpha)

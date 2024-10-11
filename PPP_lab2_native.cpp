@@ -60,8 +60,10 @@ int main()
 
     bordered = MakeImgWithBordersCopy(img, apert);
     CountKernelGauss(kernel, apert);
-    GaussFilter(bordered, 0, img.height - 1, &result, kernel, apert);
+    GaussFilter(bordered, 0, img.height - 1, result, kernel, apert);
 
+    bordered = MakeImgWithBordersCopy(result, apert);
+    MedianFilter(bordered, 0, img.height - 1, result, apert);
 
     if (stbi_write_png("result.jpg", width, height, channels, result.img.data(), width * channels)) {
         cout << "Изображение сохранено как result.jpg" << endl;
