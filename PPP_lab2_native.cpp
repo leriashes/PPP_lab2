@@ -58,6 +58,9 @@ int main()
 
     MyImg bordered;
 
+
+    auto start = chrono::high_resolution_clock::now();
+
     bordered = MakeImgWithBordersCopy(img, apert);
     CountKernelGauss(kernel, apert);
     GaussFilter(bordered, 0, img.height - 1, result, kernel, apert);
@@ -67,6 +70,11 @@ int main()
 
     bordered = MakeGrey(MakeImgWithBordersCopy(result, 1));
     SobelFilter(bordered, 0, img.height - 1, result, alpha);
+
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsed = end - start;
+
+    cout << "\n\nВремя выполнения комбинированной фильтрации (последовательный алгоритм): " << elapsed.count() << " секунд" << endl;
 
     if (stbi_write_png("result.jpg", width, height, channels, result.img.data(), width * channels)) {
         cout << "Изображение сохранено как result.jpg" << endl;
