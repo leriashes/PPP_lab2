@@ -17,7 +17,7 @@ int main()
     setlocale(LC_ALL, "rus");
     SetConsoleCP(1251);
 
-    string path = "bad.jpg";
+    string path = "3.png";
 
     //cin >> path;
 
@@ -33,10 +33,16 @@ int main()
         cerr << "Не удалось загрузить изображение!" << endl;
     }
 
-    vector<unsigned char> img(data, data + (width * height * channels));
+    vector<unsigned char> img_data(data, data + (width * height * channels));
     stbi_image_free(data);
 
-    vector<unsigned char> result(width * height * channels);
+    MyImg img;
+    img.img = img_data;
+    img.channels = channels;
+    img.width = width;
+    img.height = height;
+
+    MyImg result;
 
 
     int apert = 2;
@@ -47,13 +53,13 @@ int main()
 
     double* kernel = new double[len];
 
-    vector<unsigned char> bordered;
+    MyImg bordered;
 
     bordered = MakeImgWithBordersCopy(img, apert);
 
 
 
-    if (stbi_write_png("result.jpg", width, height, channels, result.data(), width * channels)) {
+    if (stbi_write_png("result.jpg", width, height, channels, result.img.data(), width * channels)) {
         cout << "Изображение сохранено как result.jpg" << endl;
     }
     else {
