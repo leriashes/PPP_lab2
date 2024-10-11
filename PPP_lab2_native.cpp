@@ -17,7 +17,7 @@ int main()
     setlocale(LC_ALL, "rus");
     SetConsoleCP(1251);
 
-    string path = "3.png";
+    string path = "bad.jpg";
 
     //cin >> path;
 
@@ -43,7 +43,10 @@ int main()
     img.height = height;
 
     MyImg result;
-
+    result.img = img_data;
+    result.channels = channels;
+    result.width = width;
+    result.height = height;
 
     int apert = 2;
     int alpha = 100;
@@ -51,12 +54,13 @@ int main()
     int n = 2 * apert + 1;
     int len = n * n;
 
-    double* kernel = new double[len];
+    vector<double> kernel(len);
 
     MyImg bordered;
 
     bordered = MakeImgWithBordersCopy(img, apert);
-
+    CountKernelGauss(kernel, apert);
+    GaussFilter(bordered, 0, img.height - 1, &result, kernel, apert);
 
 
     if (stbi_write_png("result.jpg", width, height, channels, result.img.data(), width * channels)) {
