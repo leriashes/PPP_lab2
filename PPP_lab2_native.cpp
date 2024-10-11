@@ -65,6 +65,9 @@ int main()
     bordered = MakeImgWithBordersCopy(result, apert);
     MedianFilter(bordered, 0, img.height - 1, result, apert);
 
+    bordered = MakeGrey(MakeImgWithBordersCopy(result, 1));
+    SobelFilter(bordered, 0, img.height - 1, result, alpha);
+
     if (stbi_write_png("result.jpg", width, height, channels, result.img.data(), width * channels)) {
         cout << "Изображение сохранено как result.jpg" << endl;
     }

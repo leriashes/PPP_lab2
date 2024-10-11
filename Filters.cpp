@@ -17,7 +17,31 @@ int NormalizeColor(int color)
 
 MyImg MakeGrey(MyImg colored)
 {
-	return MyImg();
+    MyImg img;
+    img.width = colored.width;
+    img.height = colored.height;
+    img.channels = colored.channels;
+    img.img = vector<unsigned char>(img.width * img.height * img.channels);
+
+    for (int i = 0; i < img.width; i++)
+    {
+        for (int j = 0; j < img.height; j++)
+        {
+            MyPixel pixel = colored.GetPixel(i, j);
+
+            int brightness = NormalizeColor(int(round(0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b)));
+
+            MyPixel respix;
+            respix.r = brightness;
+            respix.g = brightness;
+            respix.b = brightness;
+            respix.a = pixel.a;
+
+            img.SetPixel(i, j, respix);
+        }
+    }
+
+    return img;
 }
 
 MyImg MakeImgWithBordersCopy(MyImg img, int apert)
@@ -174,8 +198,48 @@ void MedianFilter(MyImg img, int startRow, int endRow, MyImg& result, int apert)
     }
 }
 
-void SobelFilter(MyImg img, int startRow, int endRow, MyImg result, int alpha)
+void SobelFilter(MyImg img, int startRow, int endRow, MyImg& result, int alpha)
 {
+    int n = 3;
+
+    int* matrix = new int[9] { -1, -2, -1, 0, 0, 0, 1, 2, 1};
+
+    for (int i = 0; i < result.width; i++)
+    {
+        for (int j = startRow; j <= endRow; j++)
+        {
+            int Y = 0;
+
+            for (int k = 0; k < n; k++)
+            {
+                for (int l = 0; l < n; l++)
+                {
+                    MyPixel pixel = img.GetPixel(i + l, j + k);
+
+                    Y += pixel.r * (matrix[k * n + l] + matrix[l * n + k]);
+                }
+            }
+
+            Y = NormalizeColor(Y);
+
+            if (Y > alpha)
+            {
+                Y = 255;
+            }
+            else
+            {
+                Y = 0;
+            }
+
+            MyPixel respix;
+            respix.r = Y;
+            respix.g = Y;
+            respix.b = Y;
+            respix.a = result.GetPixel(i, j).a;
+
+            result.SetPixel(i, j, respix);
+        }
+    }
 }
 
 void MyImg::SetPixel(int x, int y, MyPixel pixel)
