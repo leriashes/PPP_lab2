@@ -9,6 +9,7 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include "Filters.h"
 using namespace std;
 
 int main()
@@ -36,6 +37,21 @@ int main()
     stbi_image_free(data);
 
     vector<unsigned char> result(width * height * channels);
+
+
+    int apert = 2;
+    int alpha = 100;
+
+    int n = 2 * apert + 1;
+    int len = n * n;
+
+    double* kernel = new double[len];
+
+    vector<unsigned char> bordered;
+
+    bordered = MakeImgWithBordersCopy(img, apert);
+
+
 
     if (stbi_write_png("result.jpg", width, height, channels, result.data(), width * channels)) {
         cout << "Изображение сохранено как result.jpg" << endl;

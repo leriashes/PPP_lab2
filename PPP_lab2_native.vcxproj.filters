@@ -18,12 +18,18 @@
     <ClCompile Include="PPP_lab2_native.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Filters.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="stb_image_write.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Filters.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

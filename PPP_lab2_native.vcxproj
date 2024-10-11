@@ -127,9 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Filters.cpp" />
     <ClCompile Include="PPP_lab2_native.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Filters.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_image_write.h" />
   </ItemGroup>
