@@ -12,6 +12,45 @@
 #include "Filters.h"
 using namespace std;
 
+// Структура для передачи параметров в поток
+struct FilterParam {
+    MyImg* bordered;
+    int startRow;
+    int endRow;
+    MyImg* result;
+    vector<double>* kernel;
+    int apert;
+    int alpha;
+};
+
+static int k = 0;
+
+// Функция потока для применения гауссова фильтра
+DWORD WINAPI GaussFilterThread(LPVOID lpParam) {
+    FilterParam* param = (FilterParam*)lpParam;
+    GaussFilter(*param->bordered, param->startRow, param->endRow, *param->result, *param->kernel, param->apert);
+    //cout << k++ << endl;
+    return 0;
+}
+
+// Функция потока для применения медианного фильтра
+DWORD WINAPI MedianFilterThread(LPVOID lpParam) {
+    FilterParam* param = (FilterParam*)lpParam;
+    MedianFilter(*param->bordered, param->startRow, param->endRow, *param->result, param->apert);
+
+    //cout << 10 + k++ << endl;
+    return 0;
+}
+
+// Функция потока для применения фильтра Собеля
+DWORD WINAPI SobelFilterThread(LPVOID lpParam) {
+    FilterParam* param = (FilterParam*)lpParam;
+    SobelFilter(*param->bordered, param->startRow, param->endRow, *param->result, param->alpha);
+
+    //cout << 100 + k++ << endl;
+    return 0;
+}
+
 int main()
 {
     setlocale(LC_ALL, "rus");
@@ -33,20 +72,15 @@ int main()
         cerr << "Не удалось загрузить изображение!" << endl;
     }
 
-    vector<unsigned char> img_data(data, data + (width * height * channels));
+    //vector<unsigned char> img_data(data, data + (width * height * channels));
+
+    width = 12800;
+    height = 720;
+    vector<unsigned char> img_data(width * height * 4);
     stbi_image_free(data);
 
-    MyImg img;
-    img.img = img_data;
-    img.channels = channels;
-    img.width = width;
-    img.height = height;
-
-    MyImg result;
-    result.img = img_data;
-    result.channels = channels;
-    result.width = width;
-    result.height = height;
+    MyImg img(img_data, width, height, channels);
+    MyImg result(img_data, width, height, channels);
 
     int apert = 2;
     int alpha = 100;
@@ -77,7 +111,74 @@ int main()
     cout << "\n\nВремя выполнения комбинированной фильтрации (последовательный алгоритм): " << elapsed.count() << " секунд" << endl;
 
     if (stbi_write_png("result.jpg", width, height, channels, result.img.data(), width * channels)) {
-        cout << "Изображение сохранено как result.jpg" << endl;
+        cout << "Изображение сохранено как result.jpg\n\n" << endl;
+    }
+    else {
+        cerr << "Ошибка при сохранении изображения!" << endl;
+    }
+
+
+    int numThreads = 8;
+    
+    cout << "Введите количество потоков: ";
+    cin >> numThreads;
+
+    start = chrono::high_resolution_clock::now();
+
+    bordered = MakeImgWithBordersCopy(img, apert);
+    CountKernelGauss(kernel, apert);
+
+    vector<HANDLE> threads(numThreads);
+    vector<FilterParam> params(numThreads);
+
+    int rowsPerThread = height / numThreads;
+
+    for (int i = 0; i < numThreads; ++i) {
+        params[i] = { &bordered, i * rowsPerThread, (i == numThreads - 1) ? height - 1 : (i + 1) * rowsPerThread - 1, &result, &kernel, apert, alpha };
+    }
+
+    for (int i = 0; i < numThreads; ++i) {
+        threads[i] = CreateThread(NULL, 0, GaussFilterThread, &params[i], 0, NULL);
+    }
+
+    for (HANDLE thread : threads) {
+        WaitForSingleObject(thread, INFINITE);
+        CloseHandle(thread);
+    }
+
+
+    bordered = MakeImgWithBordersCopy(result, apert);
+
+    for (int i = 0; i < numThreads; ++i) {
+        threads[i] = CreateThread(NULL, 0, MedianFilterThread, &params[i], 0, NULL);
+    }
+
+    //// Ожидание завершения потоков для медианного фильтра
+    for (HANDLE thread : threads) {
+        WaitForSingleObject(thread, INFINITE);
+        CloseHandle(thread);
+    }
+
+    // Фильтр Собеля
+    bordered = MakeGrey(MakeImgWithBordersCopy(result, 1));
+
+    for (int i = 0; i < numThreads; ++i) {
+        threads[i] = CreateThread(NULL, 0, SobelFilterThread, &params[i], 0, NULL);
+    }
+
+    // Ожидание завершения потоков для фильтра Собеля
+    for (HANDLE thread : threads) {
+        WaitForSingleObject(thread, INFINITE);
+        CloseHandle(thread);
+    }
+
+    end = chrono::high_resolution_clock::now();
+    elapsed = end - start;
+
+    cout << "\n\nВремя выполнения комбинированной фильтрации (многопоточный алгоритм): " << elapsed.count() << " секунд" << endl;
+
+    if (stbi_write_png("result2.jpg", width, height, channels, result.img.data(), width * channels)) {
+        cout << "Изображение сохранено как result.jpg\n\n" << endl;
     }
     else {
         cerr << "Ошибка при сохранении изображения!" << endl;

@@ -17,11 +17,7 @@ int NormalizeColor(int color)
 
 MyImg MakeGrey(MyImg colored)
 {
-    MyImg img;
-    img.width = colored.width;
-    img.height = colored.height;
-    img.channels = colored.channels;
-    img.img = vector<unsigned char>(img.width * img.height * img.channels);
+    MyImg img(colored.width, colored.height, colored.channels);
 
     for (int i = 0; i < img.width; i++)
     {
@@ -31,12 +27,7 @@ MyImg MakeGrey(MyImg colored)
 
             int brightness = NormalizeColor(int(round(0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b)));
 
-            MyPixel respix;
-            respix.r = brightness;
-            respix.g = brightness;
-            respix.b = brightness;
-            respix.a = pixel.a;
-
+            MyPixel respix(brightness, brightness, brightness, pixel.a);
             img.SetPixel(i, j, respix);
         }
     }
@@ -46,11 +37,7 @@ MyImg MakeGrey(MyImg colored)
 
 MyImg MakeImgWithBordersCopy(MyImg img, int apert)
 {
-    MyImg res;
-    res.width = img.width + apert * 2;
-    res.height = img.height + apert * 2;
-    res.channels = img.channels;
-    res.img = vector<unsigned char>(res.width * res.height * res.channels);
+    MyImg res(img.width + apert * 2, img.height + apert * 2, img.channels);
 
     for (int i = 0; i < res.width; i++)
     {
@@ -147,12 +134,7 @@ void GaussFilter(MyImg img, int startRow, int endRow, MyImg& result, vector<doub
                 }
             }
 
-            MyPixel respix;
-            respix.r = NormalizeColor(int(round(R)));
-            respix.g = NormalizeColor(int(round(G)));
-            respix.b = NormalizeColor(int(round(B)));
-            respix.a = result.GetPixel(i, j).a;
-
+            MyPixel respix(NormalizeColor(int(round(R))), NormalizeColor(int(round(G))), NormalizeColor(int(round(B))), result.GetPixel(i, j).a);
             result.SetPixel(i, j, respix);
         }
     }
@@ -187,12 +169,7 @@ void MedianFilter(MyImg img, int startRow, int endRow, MyImg& result, int apert)
             sort(gmas.begin(), gmas.end());
             sort(bmas.begin(), bmas.end());
 
-            MyPixel respix;
-            respix.r = rmas[apert];
-            respix.g = gmas[apert];
-            respix.b = bmas[apert];
-            respix.a = result.GetPixel(i, j).a;
-
+            MyPixel respix(rmas[apert], gmas[apert], bmas[apert], result.GetPixel(i, j).a);
             result.SetPixel(i, j, respix);
         }
     }
@@ -231,12 +208,7 @@ void SobelFilter(MyImg img, int startRow, int endRow, MyImg& result, int alpha)
                 Y = 0;
             }
 
-            MyPixel respix;
-            respix.r = Y;
-            respix.g = Y;
-            respix.b = Y;
-            respix.a = result.GetPixel(i, j).a;
-
+            MyPixel respix(Y, Y, Y, result.GetPixel(i, j).a);
             result.SetPixel(i, j, respix);
         }
     }

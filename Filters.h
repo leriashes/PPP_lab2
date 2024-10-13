@@ -7,6 +7,11 @@ struct MyPixel {
 	unsigned char g;
 	unsigned char b;
 	unsigned char a;
+
+	MyPixel(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+		: r(r), g(g), b(b), a(a){}
+
+	MyPixel() = default;
 };
 
 struct MyImg {
@@ -17,6 +22,15 @@ struct MyImg {
 
 	void SetPixel(int x, int y, MyPixel pixel);
 	MyPixel GetPixel(int x, int y);
+	MyImg(const vector<unsigned char>& img, int width, int height, int channels)
+		: img(img), width(width), height(height), channels(channels) {}
+
+	MyImg(int width, int height, int channels)
+		: width(width), height(height), channels(channels) {
+		this->img = vector<unsigned char>(width * height * channels);
+	}
+
+	MyImg() = default;
 };
 
 int NormalizeColor(int color);
