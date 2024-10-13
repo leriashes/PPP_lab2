@@ -38,5 +38,4 @@ MyImg MakeGrey(MyImg colored);
 MyImg MakeImgWithBordersCopy(MyImg img, int apert);
 void CountKernelGauss(vector<double>& kernel, int apert);
 void GaussFilter(MyImg img, int startRow, int endRow, MyImg& result, vector<double> kernel, int apert);
-void MedianFilter(MyImg img, int startRow, int endRow, MyImg& result, int apert);
 void SobelFilter(MyImg img, int startRow, int endRow, MyImg& result, int alpha);

@@ -1,5 +1,6 @@
 #include "Filters.h"
 #include <algorithm>
+#include <set>
 
 int NormalizeColor(int color)
 {
@@ -135,41 +136,6 @@ void GaussFilter(MyImg img, int startRow, int endRow, MyImg& result, vector<doub
             }
 
             MyPixel respix(NormalizeColor(int(round(R))), NormalizeColor(int(round(G))), NormalizeColor(int(round(B))), result.GetPixel(i, j).a);
-            result.SetPixel(i, j, respix);
-        }
-    }
-}
-
-void MedianFilter(MyImg img, int startRow, int endRow, MyImg& result, int apert)
-{
-    int n = apert * 2 + 1;
-    int size = n * n;
-
-    for (int i = 0; i < result.width; i++)
-    {
-        for (int j = startRow; j <= endRow; j++)
-        {
-            vector<int> rmas(size, 0);
-            vector<int> gmas(size, 0);
-            vector<int> bmas(size, 0);
-
-            for (int k = 0; k < n; k++)
-            {
-                for (int l = 0; l < n; l++)
-                {
-                    MyPixel pixel = img.GetPixel(i + l, j + k);
-
-                    rmas[k * n + l] = pixel.r;
-                    gmas[k * n + l] = pixel.g;
-                    bmas[k * n + l] = pixel.b;
-                }
-            }
-
-            sort(rmas.begin(), rmas.end());
-            sort(gmas.begin(), gmas.end());
-            sort(bmas.begin(), bmas.end());
-
-            MyPixel respix(rmas[apert], gmas[apert], bmas[apert], result.GetPixel(i, j).a);
             result.SetPixel(i, j, respix);
         }
     }
